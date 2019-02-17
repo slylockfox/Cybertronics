@@ -46,7 +46,6 @@ class Robot : public frc::TimedRobot {
   frc::Talon m_rightRear{2};  
   frc::Talon m_rightFront{3};  
   frc::MecanumDrive m_robotDrive{m_leftFront, m_leftRear, m_rightFront, m_rightRear};
-  // frc::DifferentialDrive m_robotDrive{m_left, m_right};
   frc::Joystick m_stick{0};  
   frc::LiveWindow& m_lw = *frc::LiveWindow::GetInstance();  
   frc::Timer m_timer;
