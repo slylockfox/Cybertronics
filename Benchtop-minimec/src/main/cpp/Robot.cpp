@@ -71,11 +71,14 @@ void Robot::AutonomousPeriodic() {
 
 #define MOTOR_SCALE 1.7
 void Robot::TeleopPeriodic() {
-  // Drive with arcade style (use right stick)    
-  //m_robotDrive.DriveCartesian(0, m_stick.GetRawAxis(4), 0, 0);  // it seems X and Y are switched with my Logitech controller
-  //m_robotDrive.DriveCartesian(m_stick.GetX(),m_stick.GetY(), m_stick.GetZ(), 0);  // it seems X and Y are switched with my Logitech controller
+  // On Logitech controller, right stick is direction and speed, right stick is rotate    
   m_robotDrive.DriveCartesian(-m_stick.GetRawAxis(2), m_stick.GetRawAxis(3), -m_stick.GetRawAxis(0), 0);
-  //m_robotDrive.ArcadeDrive(m_stick.GetY()/MOTOR_SCALE, m_stick.GetX()/MOTOR_SCALE); // MJS: not so fast
+//  int count = m_leftRearEnc->Get();
+  //double distance = m_leftRearEnc->GetDistance();
+  frc::SmartDashboard::PutString("DB/String 0", "LR distance: " + std::to_string(m_leftRearEnc->GetDistance()));
+  frc::SmartDashboard::PutString("DB/String 1", "LF distance: " + std::to_string(m_leftFrontEnc->GetDistance()));
+  frc::SmartDashboard::PutString("DB/String 2", "RR distance: " + std::to_string(m_rightRearEnc->GetDistance()));
+  frc::SmartDashboard::PutString("DB/String 3", "RF distance: " + std::to_string(m_rightFrontEnc->GetDistance()));
 }
 
 void Robot::TestPeriodic() {}
