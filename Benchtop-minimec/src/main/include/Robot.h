@@ -18,6 +18,9 @@
 #include <frc/drive/DifferentialDrive.h>
 #include <frc/drive/MecanumDrive.h>
 #include <frc/livewindow/LiveWindow.h>
+#include <frc/DriverStation.h>  // for reporting errors from navx
+
+#include "navx/AHRS.h"
 
 class Robot : public frc::TimedRobot {
  public:
@@ -30,8 +33,20 @@ class Robot : public frc::TimedRobot {
   void TestPeriodic() override;
 
   Robot() {    
-      m_robotDrive.SetExpiration(0.1);    
+      m_robotDrive.SetExpiration(0.1);  
+      // m_leftRear.SetInverted(true);
+      // m_rightRear.SetInverted(true);
+      // m_leftFront.SetInverted(true);
+      // m_rightFront.SetInverted(true);  
+      m_robotDrive.SetRightSideInverted(true);      
       m_timer.Start();  
+      try {
+          ahrs = new AHRS(SPI::Port::kMXP);
+      } catch (std::exception& ex ) {
+          std::string err_string = "Error instantiating navX MXP:  ";
+          err_string += ex.what();
+          DriverStation::ReportError(err_string.c_str());
+      }
     }
 
  private:
@@ -49,6 +64,8 @@ class Robot : public frc::TimedRobot {
   frc::Joystick m_stick{0};  
   frc::LiveWindow& m_lw = *frc::LiveWindow::GetInstance();  
   frc::Timer m_timer;
+
+  AHRS *ahrs;  // navX MXP (update for Magic House April 2019)
 
 
 

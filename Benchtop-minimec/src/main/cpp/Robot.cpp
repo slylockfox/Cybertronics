@@ -46,32 +46,54 @@ void Robot::AutonomousInit() {
 
   if (m_autoSelected == kAutoNameCustom) {
     // Custom Auto goes here
-    m_timer.Reset();
-    m_timer.Start();
   } else {
     // Default Auto goes here
+    m_timer.Reset();
+    m_timer.Start();
   }
 }
 
 void Robot::AutonomousPeriodic() {
   if (m_autoSelected == kAutoNameCustom) {
     // Custom Auto goes here
-    // Drive for 2 seconds
-    if (m_timer.Get() < 2.0) {
+  } else {
+    // Default Auto goes here
+    double timer = m_timer.Get();
+
+    // test each motor individually
+    if (timer < 2.0) {
+      m_leftRear.Set(0.7);
+    } else if (timer < 4.0) {
+      m_leftRear.Set(0);
+      m_leftFront.Set(0.7);
+    } else if (timer < 6.0) {
+      m_leftFront.Set(0);
+      m_rightFront.Set(0.7);
+    } else if (timer < 8.0) {
+      m_rightFront.Set(0);
+      m_rightRear.Set(0.7);
+    } else if (timer < 10.0) {
+      m_rightRear.Set(0);
+    }
+
+    // Drive for some seconds
+    if (timer > 10 && timer < 20.0) {
       // Drive forwards half speed
       m_robotDrive.DriveCartesian(0, 0.5, 0, 0);
-    } else {
+    } else if (timer > 20.0) {
       // Stop robot
       m_robotDrive.DriveCartesian(0, 0, 0, 0);
     }
-  } else {
-    // Default Auto goes here
   }
 }
 
 #define MOTOR_SCALE 1.7
 void Robot::TeleopPeriodic() {
-  m_robotDrive.DriveCartesian(-m_stick.GetRawAxis(2), m_stick.GetRawAxis(3), -m_stick.GetRawAxis(0), 0);
+  bool reset_yaw_button_pressed = m_stick.GetRawButton(1);
+  if ( reset_yaw_button_pressed ) {
+      ahrs->ZeroYaw();
+  }
+  m_robotDrive.DriveCartesian(-m_stick.GetRawAxis(2), m_stick.GetRawAxis(3), -m_stick.GetRawAxis(0), -ahrs->GetAngle()); // MJS: navx heading
 }
 
 void Robot::TestPeriodic() {}
