@@ -15,8 +15,12 @@
 #include <frc/Joystick.h>
 #include <frc/Spark.h>
 #include <frc/Timer.h>
+#include <frc/Servo.h>
 #include <frc/drive/DifferentialDrive.h>
 #include <frc/livewindow/LiveWindow.h>
+
+#include <networktables/NetworkTable.h>
+#include <networktables/NetworkTableInstance.h>
 
 class Robot : public frc::TimedRobot {
  public:
@@ -38,6 +42,7 @@ class Robot : public frc::TimedRobot {
   const std::string kAutoNameDefault = "Default";
   const std::string kAutoNameCustom = "My Auto";
   std::string m_autoSelected;
+  std::shared_ptr<NetworkTable> m_limetable;  // for LimeLight
 
   // Robot drive system  
   frc::Spark m_left{1};  
@@ -46,6 +51,8 @@ class Robot : public frc::TimedRobot {
   frc::Joystick m_stick{0};  
   frc::LiveWindow& m_lw = *frc::LiveWindow::GetInstance();  
   frc::Timer m_timer;
+  frc::Servo m_limeServo{2};
+  double m_limeServoAngle = 90.0;
 
 
 

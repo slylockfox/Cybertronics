@@ -8,10 +8,15 @@
 #include "Robot.h"
 
 #include <iostream>
+#include <algorithm>  // for min and max
 
 #include <frc/smartdashboard/SmartDashboard.h>
 
+#include <networktables/NetworkTable.h>
+#include <networktables/NetworkTableInstance.h>
+
 void Robot::RobotInit() {
+  m_limetable = nt::NetworkTableInstance::GetDefault().GetTable("limelight");
   m_chooser.SetDefaultOption(kAutoNameDefault, kAutoNameDefault);
   m_chooser.AddOption(kAutoNameCustom, kAutoNameCustom);
   frc::SmartDashboard::PutData("Auto Modes", &m_chooser);
@@ -70,7 +75,29 @@ void Robot::AutonomousPeriodic() {
 }
 
 #define MOTOR_SCALE 1.7
+#define TARGET_TOLERANCE_V 4
+using namespace std;
 void Robot::TeleopPeriodic() {
+
+  double targetSeen = m_limetable->GetNumber("tv",0.0);
+  if (targetSeen != 0.0) {  // tv is true if there is a target detected
+    double targetOffsetAngle_Horizontal = m_limetable->GetNumber("tx",0.0);
+    double targetOffsetAngle_Vertical = m_limetable->GetNumber("ty",0.0);
+    double targetArea = m_limetable->GetNumber("ta",0.0);
+    double targetSkew = m_limetable->GetNumber("ts",0.0);
+    if (targetOffsetAngle_Vertical > TARGET_TOLERANCE_V) {
+      m_limeServoAngle -= 1;
+    } else if (targetOffsetAngle_Vertical < -TARGET_TOLERANCE_V) {
+      m_limeServoAngle += 1;
+    }
+    m_limeServoAngle = std::min(m_limeServoAngle, 180.0);
+    m_limeServoAngle = std::max(m_limeServoAngle, 0.0);
+    //m_limeServoAngle = 90.0 - targetOffsetAngle_Vertical;
+    m_limeServo.SetAngle(m_limeServoAngle);
+  } else {
+    m_limeServo.SetAngle(90);
+  }
+
   // Drive with arcade style (use right stick)    
   m_robotDrive.ArcadeDrive(m_stick.GetY()/MOTOR_SCALE, m_stick.GetX()/MOTOR_SCALE); // MJS: not so fast
 }
