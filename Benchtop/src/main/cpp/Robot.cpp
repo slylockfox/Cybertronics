@@ -17,6 +17,10 @@
 
 void Robot::RobotInit() {
   m_limetable = nt::NetworkTableInstance::GetDefault().GetTable("limelight");
+  m_robotDrive.SetRightSideInverted(true);
+  //m_left.SetInverted(true);
+  //m_right.SetInverted(true);
+
   m_chooser.SetDefaultOption(kAutoNameDefault, kAutoNameDefault);
   m_chooser.AddOption(kAutoNameCustom, kAutoNameCustom);
   frc::SmartDashboard::PutData("Auto Modes", &m_chooser);
@@ -51,40 +55,66 @@ void Robot::AutonomousInit() {
 
   if (m_autoSelected == kAutoNameCustom) {
     // Custom Auto goes here
-    m_timer.Reset();
-    m_timer.Start();
   } else {
     // Default Auto goes here
+    m_timer.Reset();
+    m_timer.Start();
   }
 }
 
 void Robot::AutonomousPeriodic() {
   if (m_autoSelected == kAutoNameCustom) {
     // Custom Auto goes here
+  } else {
+    // Default Auto goes here
     // Drive for 2 seconds
     if (m_timer.Get() < 2.0) {
+      m_robotDrive.TankDrive(0.5, 0); // left only
+    } else if (m_timer.Get() < 4.0) {
+      m_robotDrive.TankDrive(0, 0.5); // right only
+    } else if (m_timer.Get() < 6.0) {
       // Drive forwards half speed
-      m_robotDrive.ArcadeDrive(-0.5, 0.0);
+      m_robotDrive.ArcadeDrive(0.5, 0.0);
     } else {
       // Stop robot
       m_robotDrive.ArcadeDrive(0.0, 0.0);
     }
-  } else {
-    // Default Auto goes here
   }
 }
 
 #define MOTOR_SCALE 1.7
 #define TARGET_TOLERANCE_V 4
+#define TARGET_TOLERANCE_H 8
+#define LIMELIGHT_ANGLE_DEFAULT 65
+#define SPEED_ROTATE 0.3
+#define SPEED_PURSUE 0.3
+#define MIN_TARGET_AREA_PERCENT 1.0
 using namespace std;
+
 void Robot::TeleopPeriodic() {
 
+  bool ok_to_pursue_button_presssed = m_stick.GetRawButton(2);
+  bool not_ok_to_pursue_button_presssed = m_stick.GetRawButton(3);
+
+  if (ok_to_pursue_button_presssed) {
+    m_okToPursue = true;
+    frc::SmartDashboard::PutString("DB/String 0", "pursue enabled");
+  } else if (not_ok_to_pursue_button_presssed) {
+    m_okToPursue = false;
+    frc::SmartDashboard::PutString("DB/String 0", "pursue disabled");
+  }
+
+  double speed_left = 0.0;
+  double speed_right = 0.0;
+
   double targetSeen = m_limetable->GetNumber("tv",0.0);
-  if (targetSeen != 0.0) {  // tv is true if there is a target detected
+  double targetArea = m_limetable->GetNumber("ta",0.0);
+  if (targetSeen != 0.0 && targetArea > MIN_TARGET_AREA_PERCENT) {  // tv is true if there is a target detected
     double targetOffsetAngle_Horizontal = m_limetable->GetNumber("tx",0.0);
-    double targetOffsetAngle_Vertical = m_limetable->GetNumber("ty",0.0);
-    double targetArea = m_limetable->GetNumber("ta",0.0);
+    double targetOffsetAngle_Vertical = m_limetable->GetNumber("ty",0.0);   
     double targetSkew = m_limetable->GetNumber("ts",0.0);
+
+    // vertical elevation by servo
     if (targetOffsetAngle_Vertical > TARGET_TOLERANCE_V) {
       m_limeServoAngle -= 1;
     } else if (targetOffsetAngle_Vertical < -TARGET_TOLERANCE_V) {
@@ -94,12 +124,33 @@ void Robot::TeleopPeriodic() {
     m_limeServoAngle = std::max(m_limeServoAngle, 0.0);
     //m_limeServoAngle = 90.0 - targetOffsetAngle_Vertical;
     m_limeServo.SetAngle(m_limeServoAngle);
-  } else {
-    m_limeServo.SetAngle(90);
+
+    // drive toward target
+    if (m_okToPursue && targetArea <= 10.0 && targetArea > 5) { // pursue target until it's bigger
+      speed_left = SPEED_PURSUE; speed_right = SPEED_PURSUE;
+    } else if (m_okToPursue && targetArea > 10.0) { // back up!
+      speed_left = -SPEED_PURSUE; speed_right = -SPEED_PURSUE;
+    }
+
+    // center on target
+    if (targetOffsetAngle_Horizontal > TARGET_TOLERANCE_H) {
+      speed_left += SPEED_ROTATE;
+      speed_right -= SPEED_ROTATE;
+    } else if (targetOffsetAngle_Horizontal < -TARGET_TOLERANCE_H) {
+      speed_left -= SPEED_ROTATE;
+      speed_right += SPEED_ROTATE;
+    }
+
+    // move robot
+    m_robotDrive.TankDrive(speed_left, speed_right, false);
+    // m_robotDrive.TankDrive(0.2, 0.2, false);
+
+  } else {  // no vision target seen
+    m_limeServo.SetAngle(LIMELIGHT_ANGLE_DEFAULT);
+    // Drive with arcade style (use right stick)    
+    m_robotDrive.ArcadeDrive(m_stick.GetY()/MOTOR_SCALE, m_stick.GetX()/MOTOR_SCALE); // MJS: not so fast
   }
 
-  // Drive with arcade style (use right stick)    
-  m_robotDrive.ArcadeDrive(m_stick.GetY()/MOTOR_SCALE, m_stick.GetX()/MOTOR_SCALE); // MJS: not so fast
 }
 
 void Robot::TestPeriodic() {}

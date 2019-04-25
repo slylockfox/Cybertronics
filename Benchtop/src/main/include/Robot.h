@@ -45,14 +45,15 @@ class Robot : public frc::TimedRobot {
   std::shared_ptr<NetworkTable> m_limetable;  // for LimeLight
 
   // Robot drive system  
-  frc::Spark m_left{1};  
-  frc::Spark m_right{0};  
+  frc::Spark m_left{0};  
+  frc::Spark m_right{1};  
   frc::DifferentialDrive m_robotDrive{m_left, m_right};
   frc::Joystick m_stick{0};  
   frc::LiveWindow& m_lw = *frc::LiveWindow::GetInstance();  
   frc::Timer m_timer;
   frc::Servo m_limeServo{2};
   double m_limeServoAngle = 90.0;
+  bool m_okToPursue = false;
 
 
 
