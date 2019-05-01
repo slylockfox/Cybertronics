@@ -148,7 +148,7 @@ void Robot::TeleopPeriodic() {
   } else {  // no vision target seen
     m_limeServo.SetAngle(LIMELIGHT_ANGLE_DEFAULT);
     // Drive with arcade style (use right stick)    
-    m_robotDrive.ArcadeDrive(m_stick.GetY()/MOTOR_SCALE, m_stick.GetX()/MOTOR_SCALE); // MJS: not so fast
+    m_robotDrive.ArcadeDrive(-m_stick.GetY()/MOTOR_SCALE, m_stick.GetX()/MOTOR_SCALE); // MJS: not so fast
   }
 
 }
