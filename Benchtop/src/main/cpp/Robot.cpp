@@ -107,12 +107,12 @@ void Robot::TeleopPeriodic() {
   }
 
   if (limelight_cv_mode_pressed) {
-    m_limetable->PutNumber("camMode",0.0);
+    m_limetable->PutNumber("camMode",0.0); // camera in normal CV mode
     m_limetable->PutNumber("ledMode",0.0); // LED auto
     // m_limetable->PutNumber("stream",0.0);  // secondary camera side-by-side
     frc::SmartDashboard::PutString("DB/String 0", "limelight cv mode");
   } else if (limelight_driver_mode_pressed) {
-    m_limetable->PutNumber("camMode",1.0);
+    m_limetable->PutNumber("camMode",1.0); // camera in driver mode
     m_limetable->PutNumber("ledMode",1.0); // LED off
     // m_limetable->PutNumber("stream",1.0);  // secondary camera in PIP
     frc::SmartDashboard::PutString("DB/String 0", "limelight driver mode");
