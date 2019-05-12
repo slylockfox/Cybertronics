@@ -49,6 +49,7 @@ class Robot : public frc::TimedRobot {
   frc::Spark m_right{1};  
   frc::DifferentialDrive m_robotDrive{m_left, m_right};
   frc::Joystick m_stick{0};  
+  frc::Joystick m_stick_copilot{1};  
   frc::LiveWindow& m_lw = *frc::LiveWindow::GetInstance();  
   frc::Timer m_timer;
   frc::Servo m_limeServo{2};

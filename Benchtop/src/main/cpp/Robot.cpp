@@ -95,13 +95,27 @@ void Robot::TeleopPeriodic() {
 
   bool ok_to_pursue_button_presssed = m_stick.GetRawButton(2);
   bool not_ok_to_pursue_button_presssed = m_stick.GetRawButton(3);
+  bool limelight_cv_mode_pressed = m_stick_copilot.GetRawButton(2);
+  bool limelight_driver_mode_pressed = m_stick_copilot.GetRawButton(3);
 
   if (ok_to_pursue_button_presssed) {
     m_okToPursue = true;
-    frc::SmartDashboard::PutString("DB/String 0", "pursue enabled");
+    frc::SmartDashboard::PutString("DB/String 1", "pursue enabled");
   } else if (not_ok_to_pursue_button_presssed) {
     m_okToPursue = false;
-    frc::SmartDashboard::PutString("DB/String 0", "pursue disabled");
+    frc::SmartDashboard::PutString("DB/String 1", "pursue disabled");
+  }
+
+  if (limelight_cv_mode_pressed) {
+    m_limetable->PutNumber("camMode",0.0);
+    m_limetable->PutNumber("ledMode",0.0); // LED auto
+    // m_limetable->PutNumber("stream",0.0);  // secondary camera side-by-side
+    frc::SmartDashboard::PutString("DB/String 0", "limelight cv mode");
+  } else if (limelight_driver_mode_pressed) {
+    m_limetable->PutNumber("camMode",1.0);
+    m_limetable->PutNumber("ledMode",1.0); // LED off
+    // m_limetable->PutNumber("stream",1.0);  // secondary camera in PIP
+    frc::SmartDashboard::PutString("DB/String 0", "limelight driver mode");
   }
 
   double speed_left = 0.0;
