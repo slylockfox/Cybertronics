@@ -160,7 +160,7 @@ void Robot::TeleopPeriodic() {
     // m_robotDrive.TankDrive(0.2, 0.2, false);
 
   } else {  // no vision target seen
-    m_limeServo.SetAngle(LIMELIGHT_ANGLE_DEFAULT);
+    //   leave vertical alone, was... m_limeServo.SetAngle(LIMELIGHT_ANGLE_DEFAULT);
     // Drive with arcade style (use right stick)    
     m_robotDrive.ArcadeDrive(-m_stick.GetY()/MOTOR_SCALE, m_stick.GetX()/MOTOR_SCALE); // MJS: not so fast
   }
@@ -168,7 +168,9 @@ void Robot::TeleopPeriodic() {
 }
 
 void Robot::TestPeriodic() {}
-void Robot::TeleopInit() {}
+void Robot::TeleopInit() {
+  m_limeServo.SetAngle(LIMELIGHT_ANGLE_DEFAULT);
+}
 
 #ifndef RUNNING_FRC_TESTS
 int main() { return frc::StartRobot<Robot>(); }
